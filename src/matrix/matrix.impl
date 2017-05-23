@@ -1,0 +1,83 @@
+#include "matrix.h"
+
+template<typename T>
+jhc::matrix<T>::matrix(uint rows, uint cols)
+    : rows(rows)
+    , cols(cols) {
+
+    data.resize(rows * cols);
+}
+
+template<typename T>
+T jhc::matrix<T>::get(uint i, uint j) const throw(jhc::matrix_error) {
+    if(i >= rows || j >= cols)
+        throw jhc::matrix_error("jhc::matrix::get has failed: tried to access outside of bounds!");
+
+    return data.at(i * cols + j);
+}
+
+template<typename T>
+std::vector<T> jhc::matrix<T>::get_col(uint col) const throw(jhc::matrix_error) {
+    if(col >= cols)
+        throw jhc::matrix_error("jhc::matrix::get has failed: tried to access outside of bounds!");
+    
+    std::vector<T> col_vec;
+    for(uint i = 0; i < rows; ++i) {
+        col_vec.push_back(data.at(col + i*cols));
+    }
+
+    return col_vec;
+}
+
+template<typename T>
+std::vector<T> jhc::matrix<T>::get_row(uint row) const throw(jhc::matrix_error) {
+    if(row >= rows)
+        throw jhc::matrix_error("jhc::matrix::get has failed: tried to access outside of bounds!");
+
+    return std::vector<T>(data.begin() + row*cols, data.begin() + row*cols + cols);
+}
+
+template<typename T>
+void jhc::matrix<T>::set(uint i, uint j, T ele) throw(jhc::matrix_error) {
+    if(i >= rows || j >= cols)
+        throw jhc::matrix_error("jhc::matrix::get has failed: tried to access outside of bounds!");
+
+    data.at(i * cols + j) = ele;
+}
+
+template<typename T>
+jhc::matrix<T> jhc::matrix<T>::operator*(const jhc::matrix<T>& rhs) const {
+    if(this->cols != rhs.rows)
+        throw jhc::matrix_error("jhc::matrix::operator* has failed: missized arrays!");
+
+    jhc::matrix<T> ret(this->rows, rhs.cols);
+    for(uint i = 0; i < this->rows; ++i) {
+        for(uint j = 0; j < rhs.cols; ++j) {
+            auto row = this->get_row(i);
+            auto col = rhs  .get_col(j);
+
+            T aij = 0;
+            for(uint i = 0; i < row.size(); ++i) {
+                aij += row.at(i) * col.at(i);
+            }
+            ret.set(i, j, aij);
+        }
+    }
+
+    return ret;
+}
+
+template<typename T>
+jhc::matrix<T> jhc::matrix<T>::operator+(const jhc::matrix<T>& rhs) const {
+    if(this->rows != rhs.rows || this->cols != rhs.cols)
+        throw jhc::matrix_error("jhc::matrix::operator+ has failed: missized arrays!");
+
+    jhc::matrix<T> ret(rows, cols);
+    for(uint i = 0; i < rows; ++i) {
+        for(uint j = 0; j < cols; ++j) {
+            ret.set(i, j, this->get(i, j) + rhs.get(i, j));
+        }
+    }
+
+    return ret;
+}
