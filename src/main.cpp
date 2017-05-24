@@ -23,5 +23,7 @@ int main(int argc, char *argv[]) {
     jhc::buffer key("YELLOW SUBMARINE", jhc::encoding::ASCII);
 
     auto output = jhc::AES::encrypt_block(buf.chunk(0, 16), key, jhc::AES::Mode::AES_128);
+
+    return 0;
 }
 

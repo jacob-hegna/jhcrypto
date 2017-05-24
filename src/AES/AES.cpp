@@ -1,7 +1,5 @@
 #include "AES.h"
 
-#include <iostream>
-
 jhc::buffer jhc::AES::encrypt_block(jhc::buffer block, jhc::buffer key, jhc::AES::Mode mode) { 
 
     // establish Nr and Nk constants for the AES mode
@@ -31,6 +29,7 @@ jhc::buffer jhc::AES::encrypt_block(jhc::buffer block, jhc::buffer key, jhc::AES
         state = jhc::AES::sub_bytes(state);
         state = jhc::AES::shift_rows(state);
         state = jhc::AES::mix_cols(state);
+        state = jhc::AES::add_round_key(state);
     }
 
     jhc::buffer output;
@@ -82,5 +81,30 @@ jhc::matrix<uint8_t> jhc::AES::shift_rows(jhc::matrix<uint8_t> state) {
 }
 
 jhc::matrix<uint8_t> jhc::AES::mix_cols(jhc::matrix<uint8_t> state) {
+    jhc::matrix<uint8_t> new_state(4, 4);
 
+    auto m1 = [] (uint8_t v) {
+        return v;
+    };
+
+    auto m2 = [] (uint8_t v) {
+        uint8_t r  =  v << 1;
+                r ^= (v & 0b10000000) == 0b10000000 ? 0x1b : 0x00;
+        return  r;
+    };
+
+    auto m3 = [m1, m2] (uint8_t v) {
+        uint8_t r  = m2(v);
+                r ^= m1(v);
+        return  r;  
+    };
+
+    for(uint8_t j = 0; j < 4; ++j) {
+        new_state.set(0, j, m2(state[0][j]) ^ m3(state[1][j]) ^ m1(state[2][j]) ^ m1(state[3][j]));
+        new_state.set(1, j, m1(state[0][j]) ^ m2(state[1][j]) ^ m3(state[2][j]) ^ m1(state[3][j]));
+        new_state.set(2, j, m1(state[0][j]) ^ m1(state[1][j]) ^ m2(state[2][j]) ^ m3(state[3][j]));
+        new_state.set(3, j, m3(state[0][j]) ^ m1(state[1][j]) ^ m1(state[2][j]) ^ m2(state[3][j]));
+    }
+
+    return new_state;
 }

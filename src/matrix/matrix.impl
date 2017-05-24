@@ -81,3 +81,8 @@ jhc::matrix<T> jhc::matrix<T>::operator+(const jhc::matrix<T>& rhs) const {
 
     return ret;
 }
+
+template<typename T>
+std::vector<T> jhc::matrix<T>::operator[](const uint8_t i) const {
+    return this->get_row(i);
+}

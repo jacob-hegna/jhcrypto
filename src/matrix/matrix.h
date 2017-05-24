@@ -19,8 +19,9 @@ namespace jhc {
 
         void set(uint, uint, T)              throw(jhc::matrix_error);
 
-        jhc::matrix<T> operator*(const jhc::matrix<T>& rhs) const;
-        jhc::matrix<T> operator+(const jhc::matrix<T>& rhs) const;
+        jhc::matrix<T> operator* (const jhc::matrix<T>& rhs) const;
+        jhc::matrix<T> operator+ (const jhc::matrix<T>& rhs) const;
+        std::vector<T> operator[](const uint8_t         i  ) const;
     private:
         uint rows, cols;
         std::vector<T> data;
